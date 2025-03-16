@@ -1,0 +1,8 @@
+.env
+*.jpeg
+# Ent development files
+ent/generated
+ent/generated_*
+ent/tmp
+ent/*.db
+ent/*.sqlite3
