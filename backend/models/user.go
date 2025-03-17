@@ -14,10 +14,26 @@ type User struct {
 }
 
 type Model struct {
-	ID      primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
-	Name    string             `bson:"name" json:"name"`
-	ModelID string             `bson:"model_id" json:"model_id"`
-	IpfsUrl string             `bson:"ipfs_url" json:"ipfs_url"`
+	ID            primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+	Name          string             `bson:"name" json:"name"`
+	ModelID       string             `bson:"model_id" json:"model_id"`
+	Email         string             `bson:"email" json:"email"`
+	WalletAddress string             `bson:"wallet_address" json:"wallet_address"`
+	IpfsUrl       string             `bson:"ipfs_url" json:"ipfs_url"`
+	OpenAiTokenId string             `bson:"openai_token_id,omitempty" json:"openai_token_id,omitempty"`
+	Slug          string             `bson:"slug" json:"slug"`
+	Location      string             `bson:"location" json:"location"`
+	AboutMe       string             `bson:"about_me" json:"aboutMe"`
+	Value         float64            `bson:"value" json:"value"`
+	Views         int64              `bson:"views" json:"views"`
+	Tease         int64              `bson:"tease" json:"tease"`
+	Posts         int64              `bson:"posts" json:"posts"`
+	Image         struct {
+		Src string `bson:"src" json:"src"`
+	} `bson:"image" json:"image"`
+	Icon struct {
+		Src string `bson:"src" json:"src"`
+	} `bson:"icon" json:"icon"`
 }
 
 type Subscription struct {

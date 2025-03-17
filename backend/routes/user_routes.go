@@ -109,25 +109,53 @@ func RegisterModelHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if req.Name == "" || req.ModelId == "" || req.IpfsUrl == "" {
-		sendError(w, "Name, model_id, and ipfs_url are required", http.StatusBadRequest)
+	if req.Name == "" || req.ModelId == "" || req.Email == "" || req.WalletAddress == "" {
+		sendError(w, "Name, model_id, email, and wallet_address are required", http.StatusBadRequest)
 		return
 	}
 
 	collection := db.GetCollection("models")
 
+	filter := bson.M{
+		"$or": []bson.M{
+			{"model_id": req.ModelId},
+			{"email": req.Email},
+			{"wallet_address": req.WalletAddress},
+		},
+	}
+
 	var existingModel models.Model
-	err := collection.FindOne(context.Background(), bson.M{"model_id": req.ModelId}).Decode(&existingModel)
+	err := collection.FindOne(context.Background(), filter).Decode(&existingModel)
 	if err == nil {
-		sendError(w, "Model already exists with the provided model_id", http.StatusConflict)
+		sendError(w, "Model already exists with the provided model_id, email, or wallet address", http.StatusConflict)
 		return
 	}
 
 	newModel := models.Model{
-		ID:      primitive.NewObjectID(),
-		Name:    req.Name,
-		ModelID: req.ModelId,
-		IpfsUrl: req.IpfsUrl,
+		ID:            primitive.NewObjectID(),
+		Name:          req.Name,
+		ModelID:       req.ModelId,
+		Email:         req.Email,
+		WalletAddress: req.WalletAddress,
+		IpfsUrl:       req.IpfsUrl,
+		OpenAiTokenId: req.OpenAiTokenId,
+		Slug:          req.Slug,
+		Location:      req.Location,
+		AboutMe:       req.AboutMe,
+		Value:         req.Value,
+		Views:         req.Views,
+		Tease:         req.Tease,
+		Posts:         req.Posts,
+		Image: struct {
+			Src string `bson:"src" json:"src"`
+		}{
+			Src: req.Image.Src,
+		},
+		Icon: struct {
+			Src string `bson:"src" json:"src"`
+		}{
+			Src: req.Icon.Src,
+		},
 	}
 
 	_, err = collection.InsertOne(context.Background(), newModel)

@@ -129,6 +129,12 @@ func CreateNFTPinMetadataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	_, err = pinFileToIPFS(filePath, req.Name)
+	if err != nil {
+		sendError(w, fmt.Sprintf("Error pinning to IPFS: %v", err), http.StatusInternalServerError)
+		return
+	}
+
 	attributes := []types.NFTAttribute{
 		{TraitType: "Category", Value: "Art"},
 		{TraitType: "Style", Value: "Generated"},
@@ -148,10 +154,19 @@ func CreateNFTPinMetadataHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	metadataResp, err := pinJSONToIPFS(metadata, req.Name)
+	if err != nil {
+		sendError(w, fmt.Sprintf("Error pinning metadata to IPFS: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	metadataURL := fmt.Sprintf("https://ipfs.io/ipfs/%s", metadataResp.IpfsHash)
+
 	response := types.CreateNFTMetadataResponse{
 		Success:      true,
-		Message:      "Image successfully uploaded to Cloudinary",
+		Message:      "Image and metadata successfully pinned to IPFS",
 		ImageURL:     uploadResult.SecureURL,
+		IpfsURL:      metadataURL,
 		MetadataJSON: string(metadataJSON),
 	}
 
@@ -309,6 +324,69 @@ func pinFileToIPFS(filePath, fileName string) (*types.PinataResponse, error) {
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
 		return nil, fmt.Errorf("pinata API error: %s", string(body))
+	}
+
+	var pinataResp types.PinataResponse
+	if err := json.NewDecoder(resp.Body).Decode(&pinataResp); err != nil {
+		return nil, fmt.Errorf("error decoding response: %v", err)
+	}
+
+	return &pinataResp, nil
+}
+
+func pinJSONToIPFS(metadata interface{}, name string) (*types.PinataResponse, error) {
+	jwt := os.Getenv("JWT")
+	if jwt == "" {
+		return nil, fmt.Errorf("JWT environment variable not set")
+	}
+
+	jsonData, err := json.Marshal(metadata)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling metadata: %v", err)
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	part, err := writer.CreateFormFile("file", name)
+	if err != nil {
+		return nil, fmt.Errorf("error creating form file: %v", err)
+	}
+	if _, err := part.Write(jsonData); err != nil {
+		return nil, fmt.Errorf("error writing JSON data: %v", err)
+	}
+
+	pinataMetadata := map[string]string{"name": name}
+	metadataJSON, err := json.Marshal(pinataMetadata)
+	if err != nil {
+		return nil, fmt.Errorf("error marshaling metadata: %v", err)
+	}
+	if err := writer.WriteField("pinataMetadata", string(metadataJSON)); err != nil {
+		return nil, fmt.Errorf("error writing metadata field: %v", err)
+	}
+
+	if err := writer.Close(); err != nil {
+		return nil, fmt.Errorf("error closing writer: %v", err)
+	}
+
+	req, err := http.NewRequest("POST", pinataEndpoint, body)
+	if err != nil {
+		return nil, fmt.Errorf("error creating request: %v", err)
+	}
+
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", jwt))
+
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("error making request: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("pinata API error: %s", string(respBody))
 	}
 
 	var pinataResp types.PinataResponse

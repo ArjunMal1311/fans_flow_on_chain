@@ -1,4 +1,4 @@
-# OnlyFans Backend API Documentation
+# OnlyFans on Chain Backend API Documentation
 
 This is the backend API for the OnlyFans platform, providing functionality for user management, NFT creation, and subscription handling across multiple blockchain networks (ZkEVM, Moonbeam, and Metis).
 
@@ -161,6 +161,21 @@ Content-Type: application/json
     "openai_token_id": "string" // Optional
 }
 ```
+Response:
+```json
+{
+    "success": true,
+    "message": "User registered successfully",
+    "data": {
+        "id": "string",
+        "username": "string",
+        "email": "string",
+        "wallet_address": "string",
+        "ipfs_url": "string",
+        "openai_token_id": "string"
+    }
+}
+```
 
 ### 2. Register Model
 ```http
@@ -168,9 +183,55 @@ POST /register-model
 Content-Type: application/json
 
 {
-    "name": "string",     // Required
-    "model_id": "string", // Required
-    "ipfs_url": "string"  // Required
+    "name": "string",          // Required: Display name
+    "model_id": "string",      // Required: Unique identifier
+    "email": "string",         // Required: Email address
+    "wallet_address": "string", // Required: Blockchain wallet address
+    "ipfs_url": "string",      // Required: IPFS URL for model's content
+    "openai_token_id": "string", // Optional: OpenAI token ID
+    // Profile Information
+    "slug": "string",          // Optional: URL-friendly name
+    "location": "string",      // Optional: Model's location
+    "aboutMe": "string",       // Optional: Model's description
+    "value": 0.0,             // Optional: Model's value/rate
+    "views": 0,               // Optional: View count
+    "tease": 0,               // Optional: Tease count
+    "posts": 0,               // Optional: Post count
+    "image": {                // Optional: Main profile image
+        "src": "string"
+    },
+    "icon": {                 // Optional: Profile icon/avatar
+        "src": "string"
+    }
+}
+```
+Response:
+```json
+{
+    "success": true,
+    "message": "Model registered successfully",
+    "data": {
+        "id": "string",
+        "name": "string",
+        "model_id": "string",
+        "email": "string",
+        "wallet_address": "string",
+        "ipfs_url": "string",
+        "openai_token_id": "string",
+        "slug": "string",
+        "location": "string",
+        "aboutMe": "string",
+        "value": 0.0,
+        "views": 0,
+        "tease": 0,
+        "posts": 0,
+        "image": {
+            "src": "string"
+        },
+        "icon": {
+            "src": "string"
+        }
+    }
 }
 ```
 
@@ -180,10 +241,76 @@ GET /user-info?wallet_address=string
 GET /user-info-moonbeam?email=string
 GET /user-info-metis?email=string
 ```
+Response:
+```json
+{
+    "success": true,
+    "message": "User retrieved successfully",
+    "data": {
+        "user": {
+            "id": "string",
+            "username": "string",
+            "email": "string",
+            "wallet_address": "string",
+            "ipfs_url": "string",
+            "openai_token_id": "string"
+        },
+        "subscriptions": [
+            {
+                "modelId": "string",
+                "modelName": "string",
+                "ipfsUrl": "string",
+                "tokenId": "string",
+                "isListed": false,
+                "price": "string"
+            }
+        ]
+    }
+}
+```
 
 ### 4. Get User Model Info
 ```http
 GET /user-model-info?wallet_address=string&tokenId=string
+```
+Response:
+```json
+{
+    "success": true,
+    "message": "Data retrieved successfully",
+    "data": {
+        "user": {
+            "id": "string",
+            "username": "string",
+            "email": "string",
+            "wallet_address": "string",
+            "ipfs_url": "string",
+            "openai_token_id": "string"
+        },
+        "model": {
+            "id": "string",
+            "name": "string",
+            "model_id": "string",
+            "email": "string",
+            "wallet_address": "string",
+            "ipfs_url": "string",
+            "openai_token_id": "string",
+            "slug": "string",
+            "location": "string",
+            "aboutMe": "string",
+            "value": 0.0,
+            "views": 0,
+            "tease": 0,
+            "posts": 0,
+            "image": {
+                "src": "string"
+            },
+            "icon": {
+                "src": "string"
+            }
+        }
+    }
+}
 ```
 
 ## Subscription Management Routes
