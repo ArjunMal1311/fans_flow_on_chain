@@ -8,7 +8,7 @@ import "@openzeppelin/contracts/interfaces/IERC2981.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 
-contract NFT is ERC1155, AccessControl, ERC1155Burnable, IERC2981 {
+contract BlockTeaseNFTs is ERC1155, AccessControl, ERC1155Burnable, IERC2981 {
     using Strings for uint256;
     
     bytes32 public constant URI_SETTER_ROLE = keccak256("URI_SETTER_ROLE");

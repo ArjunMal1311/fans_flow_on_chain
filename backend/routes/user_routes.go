@@ -6,10 +6,11 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
-	"arjunmal1311/only_fans_on_chain/backend/db"
-	"arjunmal1311/only_fans_on_chain/backend/models"
-	"arjunmal1311/only_fans_on_chain/backend/types"
+	"arjunmal1311/fans_flow_on_chain/backend/db"
+	"arjunmal1311/fans_flow_on_chain/backend/models"
+	"arjunmal1311/fans_flow_on_chain/backend/types"
 
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
@@ -29,6 +30,10 @@ func SetupUserRoutes(router *mux.Router) {
 	router.HandleFunc("/list-subscription", ListSubscriptionHandler).Methods("PATCH")
 	router.HandleFunc("/update-subscription", UpdateSubscriptionHandler).Methods("PATCH")
 	router.HandleFunc("/listed-subscriptions", GetListedSubscriptionsHandler).Methods("GET")
+	router.HandleFunc("/models", GetAllModelsHandler).Methods("GET")
+	router.HandleFunc("/model/{slug}", GetModelBySlugHandler).Methods("GET")
+	router.HandleFunc("/subscription-options", CreateSubscriptionOptionHandler).Methods("POST")
+	router.HandleFunc("/subscription-options/{modelId}", GetSubscriptionOptionsHandler).Methods("GET")
 
 	// ZkEVM routes
 	router.HandleFunc("/purchase-subscription-zkevm", PurchaseSubscriptionZkEVMHandler).Methods("POST")
@@ -181,14 +186,27 @@ func GetUserInfoHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	usersCollection := db.GetCollection("users")
-	subscriptionsCollection := db.GetCollection("subscriptions")
 	modelsCollection := db.GetCollection("models")
+	subscriptionsCollection := db.GetCollection("subscriptions")
 
 	var user models.User
 	err := usersCollection.FindOne(context.Background(), bson.M{"wallet_address": walletAddress}).Decode(&user)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
-			sendError(w, "User not found", http.StatusNotFound)
+			var model models.Model
+			err = modelsCollection.FindOne(context.Background(), bson.M{"wallet_address": walletAddress}).Decode(&model)
+			if err != nil {
+				sendError(w, "No user or model found", http.StatusNotFound)
+				return
+			}
+			response := types.UserResponse{
+				Success: true,
+				Message: "Model retrieved successfully",
+				Data: map[string]interface{}{
+					"user": model,
+				},
+			}
+			sendJSON(w, response, http.StatusOK)
 			return
 		}
 		sendError(w, "Failed to retrieve user: "+err.Error(), http.StatusInternalServerError)
@@ -538,7 +556,7 @@ func UpdateSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.TokenId == "" || req.WalletAddress == "" {
-		sendError(w, "TokenId and wallet_address are required", http.StatusBadRequest)
+		sendError(w, "TokenId and walletAddress are required", http.StatusBadRequest)
 		return
 	}
 
@@ -559,7 +577,8 @@ func UpdateSubscriptionHandler(w http.ResponseWriter, r *http.Request) {
 	update := bson.M{
 		"$set": bson.M{
 			"user_id":   user.ID,
-			"is_listed": false,
+			"is_listed": req.IsListed,
+			"price":     req.Price,
 		},
 	}
 
@@ -1321,6 +1340,159 @@ func GetListedSubscriptionsMetisHandler(w http.ResponseWriter, r *http.Request) 
 		Success: true,
 		Message: "Listed subscriptions retrieved successfully",
 		Data:    listedSubscriptions,
+	}
+
+	sendJSON(w, response, http.StatusOK)
+}
+
+func GetAllModelsHandler(w http.ResponseWriter, r *http.Request) {
+	collection := db.GetCollection("models")
+
+	cursor, err := collection.Find(context.Background(), bson.M{})
+	if err != nil {
+		sendError(w, "Failed to retrieve models: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var models []models.Model
+	if err = cursor.All(context.Background(), &models); err != nil {
+		sendError(w, "Failed to decode models: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := types.UserResponse{
+		Success: true,
+		Message: "Models retrieved successfully",
+		Data:    models,
+	}
+
+	sendJSON(w, response, http.StatusOK)
+}
+
+func GetModelBySlugHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	slug := vars["slug"]
+
+	if slug == "" {
+		sendError(w, "Slug is required", http.StatusBadRequest)
+		return
+	}
+
+	collection := db.GetCollection("models")
+
+	var model models.Model
+	err := collection.FindOne(context.Background(), bson.M{"slug": slug}).Decode(&model)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			sendError(w, "Model not found", http.StatusNotFound)
+			return
+		}
+		sendError(w, "Failed to retrieve model: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := types.UserResponse{
+		Success: true,
+		Message: "Model retrieved successfully",
+		Data:    model,
+	}
+
+	sendJSON(w, response, http.StatusOK)
+}
+
+type SubscriptionOption struct {
+	ID          primitive.ObjectID `bson:"_id" json:"id"`
+	ModelID     string             `bson:"model_id" json:"modelId"`
+	Price       string             `bson:"price" json:"price"`
+	Duration    int                `bson:"duration" json:"duration"`
+	Description string             `bson:"description" json:"description"`
+	CreatedAt   time.Time          `bson:"created_at" json:"createdAt"`
+}
+
+func CreateSubscriptionOptionHandler(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		ModelID     string `json:"modelId"`
+		Price       string `json:"price"`
+		Duration    int    `json:"duration"`
+		Description string `json:"description"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		sendError(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	if req.ModelID == "" || req.Price == "" || req.Duration == 0 {
+		sendError(w, "ModelId, price, and duration are required", http.StatusBadRequest)
+		return
+	}
+
+	modelsCollection := db.GetCollection("models")
+	var model models.Model
+	err := modelsCollection.FindOne(context.Background(), bson.M{"model_id": req.ModelID}).Decode(&model)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			sendError(w, "Model not found", http.StatusNotFound)
+			return
+		}
+		sendError(w, "Failed to verify model: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	subscriptionOption := SubscriptionOption{
+		ID:          primitive.NewObjectID(),
+		ModelID:     req.ModelID,
+		Price:       req.Price,
+		Duration:    req.Duration,
+		Description: req.Description,
+		CreatedAt:   time.Now(),
+	}
+
+	collection := db.GetCollection("subscription_options")
+	_, err = collection.InsertOne(context.Background(), subscriptionOption)
+	if err != nil {
+		sendError(w, "Failed to create subscription option: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := types.UserResponse{
+		Success: true,
+		Message: "Subscription option created successfully",
+		Data:    subscriptionOption,
+	}
+
+	sendJSON(w, response, http.StatusCreated)
+}
+
+func GetSubscriptionOptionsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	modelId := vars["modelId"]
+
+	if modelId == "" {
+		sendError(w, "ModelId is required", http.StatusBadRequest)
+		return
+	}
+
+	collection := db.GetCollection("subscription_options")
+
+	cursor, err := collection.Find(context.Background(), bson.M{"model_id": modelId})
+	if err != nil {
+		sendError(w, "Failed to retrieve subscription options: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	defer cursor.Close(context.Background())
+
+	var options []SubscriptionOption
+	if err = cursor.All(context.Background(), &options); err != nil {
+		sendError(w, "Failed to decode subscription options: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	response := types.UserResponse{
+		Success: true,
+		Message: "Subscription options retrieved successfully",
+		Data:    options,
 	}
 
 	sendJSON(w, response, http.StatusOK)

@@ -1,4 +1,4 @@
-# OnlyFans on Chain 🌸
+# Fans Flow on Chain 🌸
 
 A decentralized platform for content creators and their fans, built on blockchain technology. This platform enables secure, transparent, and direct interactions between creators and their audience.
 
@@ -24,8 +24,8 @@ A decentralized platform for content creators and their fans, built on blockchai
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/onlyfans_on_chain_frontend.git
-cd onlyfans_on_chain_frontend
+git clone https://github.com/yourusername/fans_flow_on_chain_frontend.git
+cd fans_flow_on_chain_frontend
 ```
 
 2. Install dependencies:
@@ -100,7 +100,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Your Name - [@yourtwitter](https://twitter.com/yourtwitter)
 
-Project Link: [https://github.com/yourusername/onlyfans_on_chain_frontend](https://github.com/yourusername/onlyfans_on_chain_frontend)
+Project Link: [https://github.com/yourusername/fans_flow_on_chain_frontend](https://github.com/yourusername/fans_flow_on_chain_frontend)
 
 ---
 

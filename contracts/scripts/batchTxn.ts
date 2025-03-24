@@ -1,8 +1,7 @@
 import { ethers } from "hardhat";
 
-const purchaseSubscriptionAddress =
-  "0xF99b791257ab50be7F235BC825E7d4B83942cf38";
-const mockUsdAddress = "0x309222b7833D3D0A59A8eBf9C64A5790bf43E2aA";
+const purchaseSubscriptionAddress = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266";
+const mockUsdAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 
 async function checkBalances(mockUsd: any) {
   const signers = await ethers.getSigners();
@@ -31,7 +30,7 @@ async function batchSubscribe(mockUsd: any, modelId: number, subscriptionId: num
   const priceInMinUnits = ethers.parseUnits(priceInUsd.toString(), 8);
 
   const purchaseSubscription = await ethers.getContractAt(
-    "PurchaseSubscription",
+    "contracts/CrossChainAggregator/SourcePurchaseSubscription.sol:PurchaseSubscription",
     purchaseSubscriptionAddress
   );
 
@@ -66,7 +65,7 @@ async function batchSubscribe(mockUsd: any, modelId: number, subscriptionId: num
 async function main() {
   const mockUsd = await ethers.getContractAt(
     "MockUSD",
-    "0x309222b7833D3D0A59A8eBf9C64A5790bf43E2aA"
+    "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
   );
 
   const modelId = 2;

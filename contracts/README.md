@@ -1,10 +1,10 @@
-# OnlyFans On Chain
+# Fans Flow On Chain
 
 A decentralized content subscription platform built on blockchain technology, enabling secure, transparent, and efficient content monetization.
 
 ## Overview
 
-OnlyFans On Chain is a decentralized platform that allows content creators to monetize their content through blockchain technology. The platform utilizes smart contracts to manage subscriptions, NFT-based access control, and automated market operations.
+Fans Flow On Chain is a decentralized platform that allows content creators to monetize their content through blockchain technology. The platform utilizes smart contracts to manage subscriptions, NFT-based access control, and automated market operations.
 
 ## Key Features
 
@@ -60,7 +60,7 @@ OnlyFans On Chain is a decentralized platform that allows content creators to mo
 1. Clone the repository:
 ```bash
 git clone
-cd only_fans_on_chain
+cd fans_flow_on_chain
 ```
 
 2. Install dependencies:

@@ -1,6 +1,6 @@
-# OnlyFans on Chain Backend API Documentation
+# FansFlow on Chain Backend API Documentation
 
-This is the backend API for the OnlyFans platform, providing functionality for user management, NFT creation, and subscription handling across multiple blockchain networks (ZkEVM, Moonbeam, and Metis).
+This is the backend API for the FansFlow platform, providing functionality for user management, NFT creation, and subscription handling across multiple blockchain networks (ZkEVM, Moonbeam, and Metis).
 
 ## Table of Contents
 - [Environment Setup](#environment-setup)

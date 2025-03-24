@@ -17,7 +17,7 @@ import "./nft.sol";
 // 4. single contract to manage all tokens
 
 contract MarketPlace is ReentrancyGuard, Ownable {
-    NFT private nftContract;
+    BlockTeaseNFTs private nftContract;
     IERC20 public paymentToken;
     uint256 private _listingId;  // Counter for unique listing IDs
 
@@ -43,7 +43,7 @@ contract MarketPlace is ReentrancyGuard, Ownable {
     event NFTSold(address indexed seller, address indexed buyer, uint256 indexed tokenId, uint256 price);
 
     constructor(address _nftContract, address _paymentToken) Ownable(msg.sender) {
-        nftContract = NFT(_nftContract);
+        nftContract = BlockTeaseNFTs(_nftContract);
         paymentToken = IERC20(_paymentToken);
     }
 

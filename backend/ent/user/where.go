@@ -3,7 +3,7 @@
 package user
 
 import (
-	"arjunmal1311/only_fans_on_chain/backend/ent/predicate"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
 )

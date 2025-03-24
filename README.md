@@ -1,10 +1,10 @@
-# OnlyFans On Chain
+# FansFlow On Chain
 
 A decentralized content subscription platform built on blockchain technology, enabling secure and transparent content monetization across multiple chains.
 
 ## 🌟 Overview
 
-OnlyFans On Chain is a revolutionary platform that brings content monetization to Web3, allowing creators to manage subscriptions and content through blockchain technology. The platform operates across multiple chains including zkEVM, Moonbeam, and Metis, providing flexibility and accessibility to users worldwide.
+FansFlow On Chain is a revolutionary platform that brings content monetization to Web3, allowing creators to manage subscriptions and content through blockchain technology. The platform operates across multiple chains including zkEVM, Moonbeam, and Metis, providing flexibility and accessibility to users worldwide.
 
 ## 🏗️ Project Structure
 
@@ -32,7 +32,7 @@ The project consists of two main components:
 1. Clone the repository:
 ```bash
 git clone
-cd only_fans_on_chain
+cd fans_flow_on_chain
 ```
 
 2. Set up the smart contracts:

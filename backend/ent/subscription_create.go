@@ -3,7 +3,7 @@
 package ent
 
 import (
-	"arjunmal1311/only_fans_on_chain/backend/ent/subscription"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/subscription"
 	"context"
 	"fmt"
 

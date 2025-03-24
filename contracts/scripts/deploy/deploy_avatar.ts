@@ -5,14 +5,14 @@ export default async ({ getNamedAccounts, deployments }: { getNamedAccounts: any
     const { deploy } = deployments;
     const { deployer } = await getNamedAccounts();
 
-    const avatar = await deploy('Avatar', {
+    const userOnboarding = await deploy('UserOnboarding', {
         from: deployer,
         args: [],
         log: true,
         waitConfirmations: 1
     });
 
-    console.log(`Avatar contract deployed to: ${avatar.address}`);
+    console.log(`UserOnboarding contract deployed to: ${userOnboarding.address}`);
 };
 
-module.exports.tags = ['AvatarDeployment']; 
+module.exports.tags = ['UserOnboardingDeployment']; 

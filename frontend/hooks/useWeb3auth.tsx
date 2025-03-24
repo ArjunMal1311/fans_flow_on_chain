@@ -1,5 +1,6 @@
 'use client';
 
+import useGlobalStore from '@/hooks/useGlobalStore';
 import { createBundler, createSmartAccountClient } from '@biconomy/account';
 import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from '@web3auth/base';
 import { EthereumPrivateKeyProvider } from '@web3auth/ethereum-provider';
@@ -10,15 +11,22 @@ import { ethers } from 'ethers';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
-import useGlobalStore from '@/hooks/useGlobalStore';
-
-if (!process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID) {
-    throw new Error('NEXT_PUBLIC_WEB3AUTH_CLIENT_ID is not defined in environment variables');
-}
-
 const clientId = process.env.NEXT_PUBLIC_WEB3AUTH_CLIENT_ID;
 
+if (!clientId) {
+    throw new Error('NEXT_PUBLIC_WEB3AUTH_CLIENT_ID is not set');
+}
+
 export const chainConfig = [
+    {
+        chainNamespace: CHAIN_NAMESPACES.EIP155,
+        chainId: '0x7A69',
+        rpcTarget: 'http://127.0.0.1:8545',
+        displayName: 'Hardhat Local',
+        blockExplorerUrl: '',
+        ticker: 'ETH',
+        tickerName: 'ETH',
+    },
     {
         chainNamespace: CHAIN_NAMESPACES.EIP155,
         chainId: '0xA869',
@@ -60,23 +68,23 @@ export const chainConfig = [
 
 const config = [
     {
-        biconomyPaymasterApiKey: '_I_WZQyTV.e01cdb09-cb52-4ec1-931f-69958a2db172',
-        bundlerUrl: `https://bundler.biconomy.io/api/v2/43113/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`,
-        chainId: 43113,
+        biconomyPaymasterApiKey: process.env.NEXT_PUBLIC_BICONOMY_API_KEY,
+        bundlerUrl: 'http://127.0.0.1:8545',
+        chainId: 31337,
     },
     {
-        biconomyPaymasterApiKey: 'uPfcURYvC.cbd1a374-9004-4290-93a5-84261ac4609a',
-        bundlerUrl: `https://bundler.biconomy.io/api/v2/11155111/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`,
+        biconomyPaymasterApiKey: process.env.NEXT_PUBLIC_BICONOMY_API_KEY,
+        bundlerUrl: `https://paymaster.biconomy.io/api/v1/43113/${process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_API_KEY}`,
         chainId: 11155111,
     },
     {
-        biconomyPaymasterApiKey: '8jJqj9r_q.5c04862e-d262-4f69-bb88-ddc7c4d991f0',
-        bundlerUrl: `https://bundler.biconomy.io/api/v2/80002/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`,
+        biconomyPaymasterApiKey: process.env.NEXT_PUBLIC_BICONOMY_API_KEY,
+        bundlerUrl: `https://paymaster.biconomy.io/api/v1/43113/${process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_API_KEY}`,
         chainId: 80002,
     },
     {
-        biconomyPaymasterApiKey: '9Dfqt1w2i.ebe270ce-61dc-43a9-a9b5-048f2e18ae6d',
-        bundlerUrl: `https://bundler.biconomy.io/api/v2/2442/nJPK7B3ru.dd7f7861-190d-41bd-af80-6877f74b8f44`,
+        biconomyPaymasterApiKey: process.env.NEXT_PUBLIC_BICONOMY_API_KEY,
+        bundlerUrl: `https://paymaster.biconomy.io/api/v1/43113/${process.env.NEXT_PUBLIC_BICONOMY_PAYMASTER_API_KEY}`,
         chainId: 2442,
     },
 ];
@@ -90,7 +98,7 @@ const web3auth = new Web3Auth({
     web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
     privateKeyProvider,
     uiConfig: {
-        appName: 'BlockTease',
+        appName: 'OFOC',
         mode: 'dark',
         defaultLanguage: 'en',
     },
@@ -141,40 +149,51 @@ function useWeb3auth() {
     }, [loggedIn]);
 
     const login = async (chainIndex: number) => {
-        const web3authProvider = await web3auth.connect();
-        const ethersProvider = new ethers.providers.Web3Provider(web3authProvider as any);
-        const web3AuthSigner = ethersProvider.getSigner();
-        const bundler = await createBundler({
-            bundlerUrl: config[chainIndex].bundlerUrl,
-            userOpReceiptIntervals: {
-                [config[chainIndex].chainId]: 30000
-            },
-            userOpWaitForTxHashIntervals: {
-                [config[chainIndex].chainId]: 30000
-            },
-            userOpReceiptMaxDurationIntervals: {
-                [config[chainIndex].chainId]: 30000
-            },
-            userOpWaitForTxHashMaxDurationIntervals: {
-                [config[chainIndex].chainId]: 30000
+        try {
+            const web3authProvider = await web3auth.connect();
+            const ethersProvider = new ethers.providers.Web3Provider(web3authProvider as any);
+            const web3AuthSigner = ethersProvider.getSigner();
+
+            const currentConfig = config[chainIndex] || config[0];
+            const currentChainConfig = chainConfig[chainIndex] || chainConfig[0];
+
+            const bundler = await createBundler({
+                bundlerUrl: currentConfig.bundlerUrl,
+                chainId: currentConfig.chainId,
+                userOpReceiptIntervals: {
+                    [currentConfig.chainId]: 30000
+                },
+                userOpWaitForTxHashIntervals: {
+                    [currentConfig.chainId]: 30000
+                },
+                userOpReceiptMaxDurationIntervals: {
+                    [currentConfig.chainId]: 30000
+                },
+                userOpWaitForTxHashMaxDurationIntervals: {
+                    [currentConfig.chainId]: 30000
+                }
+            });
+
+            const smartWallet = await createSmartAccountClient({
+                signer: web3AuthSigner,
+                biconomyPaymasterApiKey: currentConfig.biconomyPaymasterApiKey,
+                bundler: bundler,
+                rpcUrl: currentChainConfig.rpcTarget,
+                chainId: currentConfig.chainId,
+            });
+
+            setSmartAccount(smartWallet);
+            const saAddress = await smartWallet.getAccountAddress();
+            setSmartAddress(saAddress);
+            setSmartAccountAddress(saAddress);
+            setProvider(web3authProvider);
+            
+            if (web3auth.connected) {
+                setLoggedIn(true);
             }
-        })
-        const smartWallet = await createSmartAccountClient({
-            signer: web3AuthSigner,
-            biconomyPaymasterApiKey: config[chainIndex].biconomyPaymasterApiKey,
-            bundler: bundler,
-            rpcUrl: chainConfig[chainIndex].rpcTarget,
-            chainId: config[chainIndex].chainId,
-        });
-        console.log('Biconomy Smart Account', smartWallet);
-        setSmartAccount(smartWallet);
-        const saAddress = await smartWallet.getAccountAddress();
-        console.log('Smart Account Address', saAddress);
-        setSmartAddress(saAddress);
-        setSmartAccountAddress(saAddress);
-        setProvider(web3authProvider);
-        if (web3auth.connected) {
-            setLoggedIn(true);
+        } catch (error) {
+            console.error('Login error:', error);
+            throw error;
         }
     };
 

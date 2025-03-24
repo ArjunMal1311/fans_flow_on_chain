@@ -2,10 +2,9 @@
 
 import useWeb3auth from "@/hooks/useWeb3auth";
 import useGlobalStore from "@/hooks/useGlobalStore";
-import { userOnBoarding } from "@/lib/functions";
-import { useEffect, useState } from "react";
 import axios from "axios";
 import Image from 'next/image';
+import { useEffect, useState } from "react";
 
 const Header = () => {
   const { login, loggedIn, logout, name, provider, email, smartAccount } = useWeb3auth();
@@ -52,62 +51,13 @@ const Header = () => {
         setOpenAiTokenId(data.openAiTokenId);
       } else {
         setIsLoading(false);
-        createNFT(name);
-      }
-    } catch (err) {
-      setIsLoading(false);
-      if (axios.isAxiosError(err) && err.response?.status === 404) {
-        createNFT(name);
-      } else {
-        console.log(err);
-      }
-    }
-  }
-
-  const createNFT = async (name: string) => {
-    try {
-      const response_avatar_image = await axios.post('http://localhost:8080/generate-avatar-imagepig', {
-        name: name,
-        prompt: "A beautiful avatar of a woman"
-      })
-
-      const data = await response_avatar_image.data;
-
-      if (true) {
-        const response_user_onboarding = await userOnBoarding(name, smartAccount);
-
-        console.log("RESPONSE USER ONBOARDING", response_user_onboarding);
-
-        if (response_user_onboarding?.hash) {
-          const response_create_nft_pin_metadata = await axios.post("http://localhost:8080/create-nft-pin-metadata", {
-            name: name,
-            description: "A beautiful avatar of a woman",
-          })
-
-          const data_response_user_onboarding = await response_create_nft_pin_metadata.data;
-
-          if (data_response_user_onboarding.success) {
-            console.log("DATA RESPONSE USER ONBOARDING", data_response_user_onboarding);
-            const response_register = await axios.post("http://localhost:8080/register", {
-              username: name,
-              email: email,
-              wallet_address: smartAddress,
-              ipfs_url: data_response_user_onboarding.ipfsUrl,
-              openAi_tokenId: data_response_user_onboarding.tokenId || "",
-            })
-
-            const data_response_register = await response_register.data;
-
-            if (data_response_register.success) {
-              fetchUserDetails(smartAddress || '', name);
-            }
-          }
-        }
       }
     } catch (err) {
       console.log(err);
+      setIsLoading(false);
     }
   }
+
 
   useEffect(() => {
     if (smartAddress && name) {
@@ -169,8 +119,6 @@ const Header = () => {
             </button>
           )}
         </div>
-
-        {/* <button onClick={() => { createNFT(name || '') }}>Create NFT</button> */}
       </div>
     </div>
   )

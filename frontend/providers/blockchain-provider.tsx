@@ -47,34 +47,38 @@ export const avalanche = {
     explorerUrl: 'https://testnet.snowtrace.io',
 };
 
+export const hardhat = {
+    chainId: 31337,
+    name: 'Hardhat Local',
+    currency: 'ETH',
+    rpcUrl: 'http://127.0.0.1:8545',
+    explorerUrl: '',
+};
 
 const metadata = {
-    name: 'Only Fans on Chain',
-    description: 'OnlyFans for web3',
+    name: 'Fans Flow on Chain',
+    description: 'Fans Flow for web3',
     url: 'http://localhost:3000',
     icons: ['https://avatars.mywebsite.com/'],
 };
-
 
 const ethersConfig = defaultConfig({
     metadata,
     enableEIP6963: true,
     enableInjected: true,
     enableCoinbase: true,
-    rpcUrl: '...',
-    defaultChainId: 1,
+    rpcUrl: 'http://127.0.0.1:8545',
+    defaultChainId: 31337,
 })
 
-
 createWeb3Modal({
-    defaultChain: avalanche,
+    defaultChain: hardhat,
     ethersConfig,
-    chains: [avalanche],
+    chains: [hardhat],
     projectId,
     enableAnalytics: true,
     enableOnramp: true,
 })
-
 
 export default function BlockchainProvider({ children }: { children: ReactNode }) {
     return <>

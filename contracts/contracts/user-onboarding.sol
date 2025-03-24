@@ -7,7 +7,7 @@ import {ConfirmedOwner} from "@chainlink/contracts/src/v0.8/shared/access/Confir
 import {FunctionsRequest} from "@chainlink/contracts/src/v0.8/functions/v1_0_0/libraries/FunctionsRequest.sol";
 
 
-contract Avatar is ERC1155, FunctionsClient, ConfirmedOwner {
+contract UserOnboarding is ERC1155, FunctionsClient, ConfirmedOwner {
     using FunctionsRequest for FunctionsRequest.Request;
 
     bytes32 public s_lastRequestId; // stores tge request id for tracking chainlink function requests

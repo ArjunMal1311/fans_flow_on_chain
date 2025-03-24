@@ -68,7 +68,7 @@ contract NFTMarketplaceAutomationVrf is VRFConsumerBaseV2Plus, CCIPReceiver, Ree
     uint32 gasLimit = 300_000;
     bytes32 donID = 0x66756e2d657468657265756d2d7365706f6c69612d3100000000000000000000;
 
-    NFT private nftContract;
+    BlockTeaseNFTs private nftContract;
     IERC20 public paymentToken;
     AggregatorV3Interface public priceFeed;
 
@@ -107,7 +107,7 @@ contract NFTMarketplaceAutomationVrf is VRFConsumerBaseV2Plus, CCIPReceiver, Ree
     event NFTSold(uint256 indexed listingId, uint256 indexed tokenId, uint256 price, address indexed buyer);
 
     constructor(address _priceFeedAddress, address _routerCrossChain, address _nftContract, address _paymentToken) CCIPReceiver(_routerCrossChain) FunctionsClient(router) VRFConsumerBaseV2Plus(vrfCoordinator) {
-        nftContract = NFT(_nftContract);
+        nftContract = BlockTeaseNFTs(_nftContract);
         paymentToken = IERC20(_paymentToken);
         priceFeed = AggregatorV3Interface(_priceFeedAddress);
         listingId = 1;

@@ -5,11 +5,11 @@ package enttest
 import (
 	"context"
 
-	"arjunmal1311/only_fans_on_chain/backend/ent"
+	"arjunmal1311/fans_flow_on_chain/backend/ent"
 	// required by schema hooks.
-	_ "arjunmal1311/only_fans_on_chain/backend/ent/runtime"
+	_ "arjunmal1311/fans_flow_on_chain/backend/ent/runtime"
 
-	"arjunmal1311/only_fans_on_chain/backend/ent/migrate"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/migrate"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

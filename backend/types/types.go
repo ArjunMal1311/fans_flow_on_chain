@@ -1,7 +1,7 @@
 package types
 
 import (
-	"arjunmal1311/only_fans_on_chain/backend/models"
+	"arjunmal1311/fans_flow_on_chain/backend/models"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -81,8 +81,10 @@ type ListSubscriptionRequest struct {
 }
 
 type UpdateSubscriptionRequest struct {
-	TokenId       string `json:"tokenId"`
-	WalletAddress string `json:"wallet_address"`
+	TokenId       string `json:"TokenId"`
+	WalletAddress string `json:"WalletAddress"`
+	IsListed      bool   `json:"IsListed"`
+	Price         string `json:"Price"`
 }
 
 type ListedSubscriptionResponse struct {

@@ -11,7 +11,7 @@ import "@chainlink/contracts/src/v0.8/shared/interfaces/AggregatorV3Interface.so
 import "../nft.sol";
 
 contract NFTMarketplace is CCIPReceiver, ReentrancyGuard, Ownable {
-    NFT private nftContract;
+    BlockTeaseNFTs private nftContract;
     IERC20 public paymentToken;
     AggregatorV3Interface public priceFeed;
     uint256 public listingId=0;
@@ -40,7 +40,7 @@ contract NFTMarketplace is CCIPReceiver, ReentrancyGuard, Ownable {
     event SubscriptionPurchasedWithEth(address indexed subscriber, uint256 modelId, uint256 subscriptionId, uint256 ethAmount, uint256 tokenId);
 
     constructor( address _priceFeedAddress, address _router, address _nftContract, address _paymentToken) Ownable(msg.sender) CCIPReceiver(_router) {
-        nftContract = NFT(_nftContract);
+        nftContract = BlockTeaseNFTs(_nftContract);
         paymentToken = IERC20(_paymentToken);
         priceFeed = AggregatorV3Interface(_priceFeedAddress);
     }
@@ -81,23 +81,22 @@ contract NFTMarketplace is CCIPReceiver, ReentrancyGuard, Ownable {
     }
 
 
-    function buyNFTWithUSDC(uint256 tokenId) public nonReentrant {
-        Listing storage listing = listings[tokenId];
+    function buyNFTWithUSDC(uint256 listingId) public nonReentrant {
+        Listing storage listing = listings[listingId];
         require(listing.isListed, "This NFT is not for sale");
         require(paymentToken.balanceOf(msg.sender) >= listing.price, "Insufficient funds");
         require(paymentToken.allowance(msg.sender, address(this)) >= listing.price, "Marketplace not authorized to use the required funds");
 
-
-        (address royaltyReceiver, uint256 royaltyAmount) = nftContract.royaltyInfo(tokenId, listing.price);
+        (address royaltyReceiver, uint256 royaltyAmount) = nftContract.royaltyInfo(listing.tokenId, listing.price);
         if (royaltyAmount > 0) {
             require(paymentToken.transferFrom(msg.sender, royaltyReceiver, royaltyAmount), "Royalty transfer failed");
         }
 
         require(paymentToken.transferFrom(msg.sender, listing.seller, listing.price - royaltyAmount), "Payment transfer failed");
-        nftContract.safeTransferFrom(listing.seller, msg.sender, tokenId, 1, "");
+        nftContract.safeTransferFrom(listing.seller, msg.sender, listing.tokenId, 1, "");
         listing.isListed = false;
 
-        emit NFTSold(listing.seller, msg.sender, tokenId, listing.price);
+        emit NFTSold(listing.seller, msg.sender, listing.tokenId, listing.price);
     }
 
     function purchaseSubscription(uint256 modelId, uint256 subscriptionId, uint256 duration) public nonReentrant {
@@ -154,6 +153,20 @@ contract NFTMarketplace is CCIPReceiver, ReentrancyGuard, Ownable {
     function updatePaymentToken(address newPaymentTokenAddress) public onlyOwner {
         require(newPaymentTokenAddress != address(0), "Invalid address");
         paymentToken = IERC20(newPaymentTokenAddress);
+    }
+
+    function getOwnerAddress(uint256 _listingId) public view returns (address) {
+        require(_listingId < listingId, "Listing does not exist");
+        return listings[_listingId].seller;
+    }
+
+    function getOwnerByTokenId(uint256 tokenId) public view returns (address) {
+        for (uint256 i = 0; i < listingId; i++) {
+            if (listings[i].tokenId == tokenId && listings[i].isListed) {
+                return listings[i].seller;
+            }
+        }
+        revert("Token not listed");
     }
 
 }

@@ -13,7 +13,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"arjunmal1311/only_fans_on_chain/backend/types"
+	"arjunmal1311/fans_flow_on_chain/backend/types"
 
 	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/cloudinary/cloudinary-go/v2/api/uploader"

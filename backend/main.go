@@ -5,12 +5,12 @@ import (
 	"net/http"
 	"os"
 
-	"arjunmal1311/only_fans_on_chain/backend/db"
-	"arjunmal1311/only_fans_on_chain/backend/routes"
-
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	"github.com/rs/cors"
+
+	"arjunmal1311/fans_flow_on_chain/backend/db"
+	"arjunmal1311/fans_flow_on_chain/backend/routes"
 )
 
 func main() {
@@ -28,8 +28,9 @@ func main() {
 
 	c := cors.New(cors.Options{
 		AllowedOrigins: []string{"http://localhost:3000"},
-		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"},
 		AllowedHeaders: []string{"Content-Type", "Authorization"},
+		Debug:          true,
 	})
 
 	handler := c.Handler(router)
@@ -39,7 +40,7 @@ func main() {
 		port = "8080"
 	}
 
-	log.Printf("Server starting on port %s", port)
+	log.Printf("Server starting on port %s...", port)
 	if err := http.ListenAndServe(":"+port, handler); err != nil {
 		log.Fatal(err)
 	}

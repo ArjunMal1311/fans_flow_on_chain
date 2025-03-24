@@ -1,14 +1,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
-import { allModelData, ModelData } from '@/utils/model-data';
+import { ModelData } from '@/utils/model-data';
 
-export default function Market() {
+interface MarketProps {
+  models: ModelData[];
+}
+
+export default function Market({ models }: MarketProps) {
+  console.log("MODELS", models);
   return (
     <div className="px-4 py-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-6">Featured Creators</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {allModelData.map((data: ModelData) => (
+        {models.map((data: ModelData) => (
           <div key={data.id} className="bg-white rounded-xl shadow-lg border border-pink-100 overflow-hidden group hover:shadow-xl transition-all duration-300">
             <div className="relative h-[300px]">
               <Image
@@ -22,11 +27,11 @@ export default function Market() {
             <div className="relative px-6 py-4 bg-white border-t border-pink-100">
               <div className="flex items-center gap-4">
                 <div className="relative h-16 w-16 ring-2 ring-pink-400 ring-offset-2 rounded-full overflow-hidden">
-                  <Image 
-                    src={data.icon.src} 
-                    alt={`${data.name}'s avatar`} 
-                    width={64} 
-                    height={64} 
+                  <Image
+                    src={data.icon.src}
+                    alt={`${data.name}'s avatar`}
+                    width={64}
+                    height={64}
                     className="rounded-full object-cover hover:scale-110 transition-transform duration-200"
                   />
                 </div>
@@ -49,7 +54,7 @@ export default function Market() {
                       <svg className="w-4 h-4 text-[#F1673D]" viewBox="0 0 29 34" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                         <path d="M1.59901 17.6116C2.25123 18.2415 2.95961 18.8155 3.71604 19.327C3.91455 19.4635 4.17672 19.4797 4.39181 19.3687C4.60689 19.2577 4.73736 19.0388 4.72808 18.8046C4.55306 14.947 4.90017 3.02643 15.5352 0.0234903C15.743 -0.0349206 15.9674 0.0173659 16.1242 0.160692C16.281 0.304018 16.3463 0.51666 16.2956 0.718671C13.5438 11.8994 20.4363 15.3139 23.5687 10.0369C23.6699 9.86162 23.8595 9.75006 24.0682 9.7429C24.2769 9.73575 24.4742 9.83404 24.5883 10.0019C27.3254 14.0605 26.6031 17.6919 25.8687 19.5874C25.7473 19.9107 25.8467 20.2724 26.1183 20.4963C26.3899 20.7203 26.7775 20.7599 27.0922 20.596C27.5548 20.352 27.9806 20.0486 28.358 19.6943C28.4524 19.6078 28.5914 19.5834 28.7116 19.6322C28.8319 19.6809 28.9104 19.7936 28.9115 19.9189V19.927C28.9145 27.4061 22.7392 33.5412 14.9505 33.7972C7.16182 34.0532 0.563646 28.3379 0.0334209 20.8761C-0.0320938 19.9482 -0.00123588 19.0163 0.125539 18.0942C0.167262 17.779 0.39238 17.5142 0.705695 17.4117C1.01901 17.3092 1.3658 17.3869 1.59942 17.612L1.59901 17.6116Z" />
                       </svg>
-                      {data.Tease}K
+                      {data.tease}K
                     </span>
                     <span className="flex items-center gap-1">
                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-pink-400">

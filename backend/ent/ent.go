@@ -3,12 +3,12 @@
 package ent
 
 import (
-	"arjunmal1311/only_fans_on_chain/backend/ent/model"
-	"arjunmal1311/only_fans_on_chain/backend/ent/subscription"
-	"arjunmal1311/only_fans_on_chain/backend/ent/subscriptionmetis"
-	"arjunmal1311/only_fans_on_chain/backend/ent/subscriptionmoonbeam"
-	"arjunmal1311/only_fans_on_chain/backend/ent/subscriptionzkevm"
-	"arjunmal1311/only_fans_on_chain/backend/ent/user"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/model"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/subscription"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/subscriptionmetis"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/subscriptionmoonbeam"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/subscriptionzkevm"
+	"arjunmal1311/fans_flow_on_chain/backend/ent/user"
 	"context"
 	"errors"
 	"fmt"

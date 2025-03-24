@@ -1,5 +1,5 @@
 {
-  "name": "onlyfans_on_chain",
+  "name": "fans_flow_on_chain",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,6 +14,7 @@
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
     "hardhat": "^2.22.19",
     "hardhat-deploy": "^0.14.0",
+    "ts-node": "^10.9.2",
     "typescript": "^5.8.2"
   },
   "dependencies": {

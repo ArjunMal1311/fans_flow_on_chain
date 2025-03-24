@@ -7,7 +7,9 @@ export default function RootLayout({
 }) {
   return (
     <html >
-      <body className=' ' >{children}</body>
+      <body className=''>
+        {children}
+      </body>
     </html>
   );
 }
